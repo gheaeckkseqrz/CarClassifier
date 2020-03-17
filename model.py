@@ -1,4 +1,5 @@
 import torch
+import context_block
 
 class Model(torch.nn.Module):
     def __init__(self, nb_classes, nc=16):
@@ -7,57 +8,57 @@ class Model(torch.nn.Module):
         self.features = torch.nn.Sequential(
             # 3x256x256
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(3, nc, 3, 1, 1),
+            context_block.ContextBlock(3, nc, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(nc),
             # ncx256x256
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(nc, 2*nc, 3, 2, 1),
+            context_block.ContextBlock(nc, 2*nc, 2),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncx128x128
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(2*nc, nc, 3, 1, 1),
+            context_block.ContextBlock(2*nc, nc, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(nc),
             # ncx128x128
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(nc, 2*nc, 3, 2, 1),
+            context_block.ContextBlock(nc, 2*nc, 2),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncx2*ncx2*nc
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(2*nc, nc, 3, 1, 1),
+            context_block.ContextBlock(2*nc, nc, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(nc),
             # ncx2*ncx2*nc
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(nc, 2*nc, 3, 2, 1),
+            context_block.ContextBlock(nc, 2*nc, 2),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncxncxnc
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(2*nc, nc, 3, 1, 1),
+            context_block.ContextBlock(2*nc, nc, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(nc),
             # ncxncxnc
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(nc, 2*nc, 3, 2, 1),
+            context_block.ContextBlock(nc, 2*nc, 2),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncx16x16
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(2*nc, nc, 3, 1, 1),
+            context_block.ContextBlock(2*nc, nc, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(nc),
             # ncx16x16
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(nc, 2*nc, 3, 2, 1),
+            context_block.ContextBlock(nc, 2*nc, 2),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncx8x8
             torch.nn.Dropout(.2),
-            torch.nn.Conv2d(2*nc, 8, 3, 1, 1),
+            context_block.ContextBlock(2*nc, 8, 1),
             torch.nn.CELU(),
             torch.nn.BatchNorm2d(8),
             # ncx8x8

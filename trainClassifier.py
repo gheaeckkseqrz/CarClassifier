@@ -22,7 +22,7 @@ viz = visdom.Visdom()
 
 m = model.Model(nb_classes)
 m = m.cuda()
-m.load_state_dict(torch.load('classifier_model.pt'))
+#m.load_state_dict(torch.load('classifier_model.pt'))
 print(m)
 
 initial_learning_rate = 100 / sum(p.numel() for p in m.parameters() if p.requires_grad)
@@ -86,7 +86,7 @@ def test(m, dataloader):
     testlm.registerLoss(loss / len(testdataset))
 
 while True:
-    train(m, optim, traindataset)
     test(m, testdataloader)
+    train(m, optim, traindataset)
     torch.save(m.state_dict(), "classifier_model.pt")
     torch.save(optim.state_dict(), "classifier_optim.pt")
