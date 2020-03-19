@@ -20,7 +20,7 @@ nb_classes = len(traindataset.classes)
 
 viz = visdom.Visdom()
 
-m = model.Model(nb_classes)
+m = model.Model(nb_classes, 64)
 m = m.cuda()
 #m.load_state_dict(torch.load('classifier_model.pt'))
 print(m)

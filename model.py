@@ -58,15 +58,15 @@ class Model(torch.nn.Module):
             torch.nn.BatchNorm2d(2*nc),
             # 2*ncx8x8
             torch.nn.Dropout(.2),
-            context_block.ContextBlock(2*nc, 8, 1),
+            context_block.ContextBlock(2*nc, nc, 1),
             torch.nn.CELU(),
-            torch.nn.BatchNorm2d(8),
+            torch.nn.BatchNorm2d(nc),
             # ncx8x8
             )
         self.classifier = torch.nn.Sequential(
             torch.nn.Flatten(),
             torch.nn.Dropout(.2),
-            torch.nn.Linear(8*8*8, 100),
+            torch.nn.Linear(nc*8*8, 100),
             torch.nn.CELU(),
             torch.nn.Dropout(.2),
             torch.nn.Linear(100, nb_classes)
