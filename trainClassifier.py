@@ -9,20 +9,20 @@ import data_augmentation
 import radam
 
 testtransform = torchvision.transforms.Compose([
-    torchvision.transforms.Resize(256),
-    torchvision.transforms.CenterCrop(256),
-    torchvision.transforms.ToTensor()
+    torchvision.transforms.Resize(300),
+    torchvision.transforms.TenCrop(256),
+    torchvision.transforms.Lambda(lambda crops: torch.stack([torchvision.transforms.ToTensor()(crop) for crop in crops]))
 ])
 traindataset = torchvision.datasets.ImageFolder(root="/home/wilmot_p/DATA/CARS/folder/stanford-car-dataset-by-classes-folder/car_data/car_data/train/", transform=data_augmentation.traintransform)
-testdataset = nonechucks.SafeDataset(torchvision.datasets.ImageFolder(root="/home/wilmot_p/DATA/CARS/folder/stanford-car-dataset-by-classes-folder/car_data/car_data/test/", transform=testtransform))
-testdataloader = torch.utils.data.DataLoader(testdataset, batch_size=16, shuffle=True)
+testdataset = torchvision.datasets.ImageFolder(root="/home/wilmot_p/DATA/CARS/folder/stanford-car-dataset-by-classes-folder/car_data/car_data/test/", transform=testtransform)
+testdataloader = torch.utils.data.DataLoader(testdataset, batch_size=4, shuffle=True)
 nb_classes = len(traindataset.classes)
 
 viz = visdom.Visdom()
 
 m = model.Model(nb_classes, 64)
 m = m.cuda()
-#m.load_state_dict(torch.load('classifier_model.pt'))
+m.load_state_dict(torch.load('classifier_model.pt'))
 print(m)
 
 initial_learning_rate = 100 / sum(p.numel() for p in m.parameters() if p.requires_grad)
@@ -66,15 +66,16 @@ def test(m, dataloader):
     loss = 0
     display = True
     for img, label in progressbar.progressbar(dataloader):
+        bs, ncrops, c, h, w = img.size()
+        img = img.view(-1, c, h, w).cuda()
         if display:
-            viz.images(img, win="TEST_SAMPLES", opts={'title':"Testing Samples"})
+            viz.images(img, win="TEST_SAMPLES", nrow=5, opts={'title':"Testing Samples"})
             display = False
-        img = img.cuda()
         label = label.cuda()
-        y = m(img).squeeze()
+        y = m(img).view(bs, ncrops, nb_classes).mean(1)
         loss += torch.nn.functional.cross_entropy(y, label).item()
         _, max_indicices = torch.max(y, 1)
-        confusion_matrix[max_indicices, label] += 1
+        confusion_matrix[max_indicices.data, label.data] += 1
     correct = torch.sum(confusion_matrix.diag()).item()
     total = torch.sum(confusion_matrix).item()
     viz.heatmap(confusion_matrix, win="ConfusionTest", opts={
